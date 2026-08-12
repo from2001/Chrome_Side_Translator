@@ -8,6 +8,7 @@ A Manifest V3 Chrome extension that opens in the browser side panel and uses the
 - Extracts likely article or main-page content while removing headers, footers, navigation, advertisements, forms, and similar chrome.
 - Translates the extracted content into Japanese while preserving its structure.
 - Summarizes the extracted content in Japanese with an overview and key points.
+- Lets users customize the translation and summarization instructions from the settings page.
 - Uses `gpt-5.4-nano` through the OpenAI Responses API.
 - Stores the user-provided API key only in `chrome.storage.local`.
 - Renders a safe Markdown subset with DOM APIs, without executing webpage or model-generated HTML.

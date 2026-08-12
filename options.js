@@ -1,28 +1,55 @@
+import { DEFAULT_INSTRUCTIONS, INSTRUCTION_STORAGE_KEYS } from "./lib/openai.js";
+
 const API_KEY_STORAGE_KEY = "openaiApiKey";
 
 const form = document.querySelector("#settings-form");
 const apiKeyInput = document.querySelector("#api-key");
 const toggleKeyButton = document.querySelector("#toggle-key");
 const deleteKeyButton = document.querySelector("#delete-key");
+const translateInstructionInput = document.querySelector("#translate-instruction");
+const summarizeInstructionInput = document.querySelector("#summarize-instruction");
+const resetInstructionsButton = document.querySelector("#reset-instructions");
 const statusElement = document.querySelector("#settings-status");
 
 initialize();
 
 async function initialize() {
-  const stored = await chrome.storage.local.get(API_KEY_STORAGE_KEY);
+  const stored = await chrome.storage.local.get([
+    API_KEY_STORAGE_KEY,
+    INSTRUCTION_STORAGE_KEYS.translate,
+    INSTRUCTION_STORAGE_KEYS.summarize
+  ]);
   apiKeyInput.value = stored[API_KEY_STORAGE_KEY] || "";
+  translateInstructionInput.value = stored[INSTRUCTION_STORAGE_KEYS.translate] || DEFAULT_INSTRUCTIONS.translate;
+  summarizeInstructionInput.value = stored[INSTRUCTION_STORAGE_KEYS.summarize] || DEFAULT_INSTRUCTIONS.summarize;
 }
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const apiKey = apiKeyInput.value.trim();
-  if (!apiKey) {
-    showStatus("APIキーを入力してください。", true);
+  const translateInstruction = translateInstructionInput.value.trim();
+  const summarizeInstruction = summarizeInstructionInput.value.trim();
+  if (!translateInstruction || !summarizeInstruction) {
+    showStatus("翻訳用と要約用のInstructionを入力してください。", true);
     return;
   }
 
-  await chrome.storage.local.set({ [API_KEY_STORAGE_KEY]: apiKey });
-  showStatus("APIキーを保存しました。", false);
+  const settings = {
+    [INSTRUCTION_STORAGE_KEYS.translate]: translateInstruction,
+    [INSTRUCTION_STORAGE_KEYS.summarize]: summarizeInstruction
+  };
+  if (apiKey) {
+    settings[API_KEY_STORAGE_KEY] = apiKey;
+  }
+
+  await chrome.storage.local.set(settings);
+  showStatus(apiKey ? "APIキーとInstructionを保存しました。" : "Instructionを保存しました。", false);
+});
+
+resetInstructionsButton.addEventListener("click", () => {
+  translateInstructionInput.value = DEFAULT_INSTRUCTIONS.translate;
+  summarizeInstructionInput.value = DEFAULT_INSTRUCTIONS.summarize;
+  showStatus("Instructionを既定値に戻しました。保存すると反映されます。", false);
 });
 
 toggleKeyButton.addEventListener("click", () => {

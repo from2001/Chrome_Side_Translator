@@ -15,23 +15,42 @@
       </header>
 
       <form id="settings-form" class="settings-card">
-        <label for="api-key">OpenAI APIキー</label>
-        <div class="input-row">
-          <input id="api-key" name="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
-          <button id="toggle-key" class="text-button" type="button" aria-label="APIキーを表示">表示</button>
-        </div>
-        <p class="field-note">キーはOpenAI APIへのリクエストにのみ使用します。同期ストレージには保存しません。</p>
+        <section class="settings-section" aria-labelledby="api-settings-title">
+          <h2 id="api-settings-title">APIキー</h2>
+          <label for="api-key">OpenAI APIキー</label>
+          <div class="input-row">
+            <input id="api-key" name="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
+            <button id="toggle-key" class="text-button" type="button" aria-label="APIキーを表示">表示</button>
+          </div>
+          <p class="field-note">キーはOpenAI APIへのリクエストにのみ使用します。同期ストレージには保存しません。</p>
+        </section>
+
+        <section class="settings-section" aria-labelledby="instruction-settings-title">
+          <div class="settings-section-heading">
+            <div>
+              <h2 id="instruction-settings-title">Instructions</h2>
+              <p>OpenAI APIへ送る翻訳・要約の指示を編集できます。</p>
+            </div>
+            <button id="reset-instructions" class="text-button" type="button">既定値に戻す</button>
+          </div>
+
+          <label for="translate-instruction">翻訳用</label>
+          <textarea id="translate-instruction" name="translateInstruction" rows="8" spellcheck="true" required></textarea>
+
+          <label for="summarize-instruction">要約用</label>
+          <textarea id="summarize-instruction" name="summarizeInstruction" rows="8" spellcheck="true" required></textarea>
+        </section>
 
         <div class="settings-actions">
-          <button class="primary-save-button" type="submit">保存</button>
-          <button id="delete-key" class="danger-button" type="button">削除</button>
+          <button class="primary-save-button" type="submit">設定を保存</button>
+          <button id="delete-key" class="danger-button" type="button">APIキーを削除</button>
         </div>
         <p id="settings-status" class="settings-status" role="status"></p>
       </form>
 
       <aside class="privacy-note">
         <h2>データの取り扱い</h2>
-        <p>翻訳・要約を実行すると、抽出したページ本文とページタイトル・URLがOpenAI APIへ送信されます。機密情報を含むページでは実行しないでください。</p>
+        <p>翻訳・要約を実行すると、抽出したページ本文と設定したInstructionがOpenAI APIへ送信されます。ページタイトルとURLは送信されません。機密情報を含むページでは実行しないでください。</p>
       </aside>
     </main>
 

@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildResponseRequest, extractResponseText, OPENAI_MODEL } from "../lib/openai.js";
+import {
+  buildResponseRequest,
+  DEFAULT_INSTRUCTIONS,
+  extractResponseText,
+  OPENAI_MODEL
+} from "../lib/openai.js";
 
 test("buildResponseRequest sends only webpage content and defines the output contract", () => {
   const request = buildResponseRequest("translate", {
@@ -12,10 +17,18 @@ test("buildResponseRequest sends only webpage content and defines the output con
 
   assert.equal(request.model, OPENAI_MODEL);
   assert.equal(request.model, "gpt-5.4-nano");
-  assert.match(request.instructions, /only untrusted webpage body text/);
-  assert.match(request.instructions, /Never return JSON/);
+  assert.equal(request.instructions, DEFAULT_INSTRUCTIONS.translate);
+  assert.match(request.instructions, /信頼できないWebページの本文/);
+  assert.match(request.instructions, /JSON/);
   assert.equal(request.input, "Hello world");
   assert.doesNotMatch(request.input, /quoted title|example\.com|SOURCE_DATA_JSON/);
+});
+
+test("buildResponseRequest uses a custom instruction for each operation", () => {
+  const request = buildResponseRequest("summarize", { content: "Hello world" }, " 日本語で短くまとめること。 ");
+
+  assert.equal(request.instructions, "日本語で短くまとめること。");
+  assert.equal(request.max_output_tokens, 6000);
 });
 
 test("extractResponseText combines message text and ignores reasoning output", () => {

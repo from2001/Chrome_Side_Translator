@@ -1,4 +1,4 @@
-import { requestOpenAI } from "./lib/openai.js";
+import { INSTRUCTION_STORAGE_KEYS, requestOpenAI } from "./lib/openai.js";
 import { normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
 
 const API_KEY_STORAGE_KEY = "openaiApiKey";
@@ -79,10 +79,14 @@ async function processPage(mode) {
       `${page.content.length.toLocaleString("ja-JP")}文字を gpt-5.4-nano へ送信しています。`
     );
 
+    const instructionKey = INSTRUCTION_STORAGE_KEYS[mode];
+    const storedInstruction = await chrome.storage.local.get(instructionKey);
+
     const output = await requestOpenAI({
       apiKey,
       mode,
       page,
+      instruction: storedInstruction[instructionKey] || "",
       signal: activeController.signal
     });
 
