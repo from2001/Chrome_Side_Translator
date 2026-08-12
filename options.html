@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Side Translator 設定</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="options-page">
+    <main class="settings-shell">
+      <header class="settings-header">
+        <p class="eyebrow">SIDE TRANSLATOR</p>
+        <h1>API設定</h1>
+        <p>OpenAI APIキーはChromeのローカルストレージに保存され、この拡張機能からのみ利用されます。</p>
+      </header>
+
+      <form id="settings-form" class="settings-card">
+        <label for="api-key">OpenAI APIキー</label>
+        <div class="input-row">
+          <input id="api-key" name="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
+          <button id="toggle-key" class="text-button" type="button" aria-label="APIキーを表示">表示</button>
+        </div>
+        <p class="field-note">キーはOpenAI APIへのリクエストにのみ使用します。同期ストレージには保存しません。</p>
+
+        <div class="settings-actions">
+          <button class="primary-save-button" type="submit">保存</button>
+          <button id="delete-key" class="danger-button" type="button">削除</button>
+        </div>
+        <p id="settings-status" class="settings-status" role="status"></p>
+      </form>
+
+      <aside class="privacy-note">
+        <h2>データの取り扱い</h2>
+        <p>翻訳・要約を実行すると、抽出したページ本文とページタイトル・URLがOpenAI APIへ送信されます。機密情報を含むページでは実行しないでください。</p>
+      </aside>
+    </main>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
