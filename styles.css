@@ -27,7 +27,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -483,6 +484,36 @@ p {
   font-weight: 750;
 }
 
+.settings-section + .settings-section {
+  margin-top: 26px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.settings-section h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.settings-section-heading {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.settings-section-heading h2 {
+  margin-bottom: 5px;
+}
+
+.settings-section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .input-row {
   display: flex;
   gap: 8px;
@@ -499,6 +530,25 @@ p {
 }
 
 .input-row input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(18, 107, 85, 0.12);
+}
+
+.settings-section textarea {
+  display: block;
+  width: 100%;
+  min-height: 150px;
+  margin-bottom: 20px;
+  padding: 13px 14px;
+  resize: vertical;
+  color: var(--ink);
+  border: 1px solid #cfd9d5;
+  border-radius: 12px;
+  outline: none;
+  line-height: 1.65;
+}
+
+.settings-section textarea:focus {
   border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(18, 107, 85, 0.12);
 }
