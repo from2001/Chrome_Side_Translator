@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Side Translator</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="panel-page">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">OPENAI POWERED</p>
+        <h1>Side Translator</h1>
+      </div>
+      <button id="open-settings" class="icon-button" type="button" aria-label="設定を開く" title="設定を開く">
+        <span aria-hidden="true">⚙</span>
+      </button>
+    </header>
+
+    <main>
+      <section id="key-notice" class="notice" hidden>
+        <div>
+          <strong>APIキーを設定してください</strong>
+          <p>翻訳・要約にはOpenAI APIキーが必要です。</p>
+        </div>
+        <button id="notice-settings" class="text-button" type="button">設定</button>
+      </section>
+
+      <section class="action-card" aria-labelledby="action-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">CURRENT PAGE</p>
+            <h2 id="action-title">表示中のページを処理</h2>
+          </div>
+          <span id="key-state" class="status-badge">確認中</span>
+        </div>
+
+        <p class="helper-text">ヘッダー、フッター、ナビゲーションなどを除き、本文として判定した内容を送信します。</p>
+
+        <div class="action-grid">
+          <button id="translate-button" class="primary-button" type="button" data-mode="translate">
+            <span class="button-icon" aria-hidden="true">文</span>
+            <span>
+              <strong>日本語に翻訳</strong>
+              <small>構造を保って自然な日本語へ</small>
+            </span>
+          </button>
+          <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
+            <span class="button-icon" aria-hidden="true">要</span>
+            <span>
+              <strong>日本語で要約</strong>
+              <small>概要と重要ポイントを整理</small>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section id="progress-card" class="progress-card" aria-live="polite" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <div>
+          <strong id="progress-title">本文を抽出しています</strong>
+          <p id="progress-detail">ページのメインコンテンツを解析中です。</p>
+        </div>
+      </section>
+
+      <section id="error-card" class="error-card" role="alert" hidden>
+        <strong>処理できませんでした</strong>
+        <p id="error-message"></p>
+      </section>
+
+      <section id="result-card" class="result-card" aria-labelledby="result-title" hidden>
+        <div class="result-header">
+          <div>
+            <p id="result-mode" class="section-kicker">TRANSLATION</p>
+            <h2 id="result-title">処理結果</h2>
+          </div>
+          <button id="copy-button" class="text-button" type="button">コピー</button>
+        </div>
+        <div id="source-meta" class="source-meta"></div>
+        <div id="result-output" class="result-output" tabindex="0"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>Model: <code>gpt-5.4-nano</code></span>
+      <button id="footer-settings" class="link-button" type="button">API設定</button>
+    </footer>
+
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

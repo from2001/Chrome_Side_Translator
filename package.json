@@ -1,0 +1,12 @@
+{
+  "name": "chrome-side-translator",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
