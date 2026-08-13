@@ -7,6 +7,9 @@ const sidepanelSource = readFileSync(new URL("../sidepanel.js", import.meta.url)
 const extractionStart = sidepanelSource.indexOf("function extractMainContentFromPage() {");
 const extractionEnd = sidepanelSource.indexOf("\nfunction setBusy", extractionStart);
 const extractionFunctionSource = sidepanelSource.slice(extractionStart, extractionEnd);
+const inspectionStart = sidepanelSource.indexOf("function inspectSelectionOnPage() {");
+const inspectionEnd = sidepanelSource.indexOf("\nasync function refreshKeyState", inspectionStart);
+const inspectionFunctionSource = sidepanelSource.slice(inspectionStart, inspectionEnd);
 
 function runExtraction({ selectionText = "", activeElement = null } = {}) {
   const context = {
@@ -57,4 +60,34 @@ test("page extraction supports selected text inside form controls", () => {
 
   assert.equal(result.content, "control");
   assert.equal(result.sourceType, "selection");
+});
+
+test("selection inspection reports the selected character count", () => {
+  const context = {
+    chrome: {
+      runtime: {
+        sendMessage() {
+          return Promise.resolve();
+        }
+      }
+    },
+    document: {
+      activeElement: null,
+      addEventListener() {}
+    },
+    window: {
+      requestAnimationFrame() {},
+      getSelection() {
+        return {
+          isCollapsed: false,
+          toString() {
+            return " Selected text ";
+          }
+        };
+      }
+    }
+  };
+  const inspect = vm.runInNewContext(`(${inspectionFunctionSource})`, context);
+
+  assert.deepEqual({ ...inspect() }, { length: 13 });
 });

@@ -53,6 +53,14 @@
     </main>
 
     <div class="action-dock" role="region" aria-label="ページの処理操作">
+      <div id="source-indicator" class="source-indicator" aria-live="polite">
+        <span id="source-indicator-icon" class="source-indicator-icon" aria-hidden="true">頁</span>
+        <span>
+          <strong id="source-indicator-label">ページ本文を処理します</strong>
+          <small id="source-indicator-detail">テキストを選択すると、その範囲だけを処理します</small>
+        </span>
+      </div>
+
       <div class="action-grid">
         <button id="translate-button" class="primary-button" type="button" data-mode="translate">
           <span class="button-icon" aria-hidden="true">文</span>

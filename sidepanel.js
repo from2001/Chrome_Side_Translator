@@ -5,6 +5,10 @@ const API_KEY_STORAGE_KEY = "openaiApiKey";
 
 const elements = {
   keyNotice: document.querySelector("#key-notice"),
+  sourceIndicator: document.querySelector("#source-indicator"),
+  sourceIndicatorIcon: document.querySelector("#source-indicator-icon"),
+  sourceIndicatorLabel: document.querySelector("#source-indicator-label"),
+  sourceIndicatorDetail: document.querySelector("#source-indicator-detail"),
   translateButton: document.querySelector("#translate-button"),
   summarizeButton: document.querySelector("#summarize-button"),
   progressCard: document.querySelector("#progress-card"),
@@ -21,11 +25,12 @@ const elements = {
 
 let activeController = null;
 let currentResultText = "";
+let sourceRefreshSequence = 0;
 
 initialize();
 
 async function initialize() {
-  await refreshKeyState();
+  await Promise.all([refreshKeyState(), refreshSourceIndicator()]);
 
   document.querySelectorAll("#open-settings, #notice-settings, #footer-settings")
     .forEach((button) => button.addEventListener("click", () => chrome.runtime.openOptionsPage()));
@@ -39,6 +44,92 @@ async function initialize() {
       refreshKeyState();
     }
   });
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message && message.type === "selection-state-changed") {
+      refreshSourceIndicator();
+    }
+  });
+
+  chrome.tabs.onActivated.addListener(refreshSourceIndicator);
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+    if (changeInfo.status === "complete") {
+      refreshSourceIndicator();
+    }
+  });
+  window.addEventListener("focus", refreshSourceIndicator);
+}
+
+async function refreshSourceIndicator() {
+  const sequence = ++sourceRefreshSequence;
+  let selectionLength = 0;
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id && /^https?:\/\//i.test(tab.url || "")) {
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: inspectSelectionOnPage
+      });
+      selectionLength = injection && injection.result ? injection.result.length : 0;
+    }
+  } catch {
+    selectionLength = 0;
+  }
+
+  if (sequence !== sourceRefreshSequence) {
+    return;
+  }
+
+  const hasSelection = selectionLength > 0;
+  elements.sourceIndicator.classList.toggle("has-selection", hasSelection);
+  elements.sourceIndicatorIcon.textContent = hasSelection ? "選" : "頁";
+  elements.sourceIndicatorLabel.textContent = hasSelection
+    ? "選択範囲を処理します"
+    : "ページ本文を処理します";
+  elements.sourceIndicatorDetail.textContent = hasSelection
+    ? `${selectionLength.toLocaleString("ja-JP")}文字を選択中`
+    : "テキストを選択すると、その範囲だけを処理します";
+}
+
+function inspectSelectionOnPage() {
+  const monitorKey = "__sideTranslatorSelectionMonitorInstalled";
+
+  if (!globalThis[monitorKey]) {
+    globalThis[monitorKey] = true;
+    let reportScheduled = false;
+
+    const scheduleReport = () => {
+      if (reportScheduled) {
+        return;
+      }
+
+      reportScheduled = true;
+      window.requestAnimationFrame(() => {
+        reportScheduled = false;
+        chrome.runtime.sendMessage({ type: "selection-state-changed" }).catch(() => {});
+      });
+    };
+
+    document.addEventListener("selectionchange", scheduleReport);
+    document.addEventListener("select", scheduleReport, true);
+  }
+
+  return { length: getSelectedText().trim().length };
+
+  function getSelectedText() {
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === "TEXTAREA" || activeElement.tagName === "INPUT")) {
+      const start = activeElement.selectionStart;
+      const end = activeElement.selectionEnd;
+      if (typeof start === "number" && typeof end === "number" && end > start) {
+        return activeElement.value.slice(start, end);
+      }
+    }
+
+    const selection = window.getSelection();
+    return selection && !selection.isCollapsed ? selection.toString() : "";
+  }
 }
 
 async function refreshKeyState() {

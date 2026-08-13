@@ -105,7 +105,7 @@ p {
 }
 
 .panel-page main {
-  padding: 18px 18px 220px;
+  padding: 18px 18px 280px;
 }
 
 .notice,
@@ -171,6 +171,58 @@ p {
   background: rgba(247, 249, 248, 0.96);
   box-shadow: 0 -10px 30px rgba(30, 55, 48, 0.1);
   backdrop-filter: blur(14px);
+}
+
+.source-indicator {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.source-indicator.has-selection {
+  color: var(--green-dark);
+  border-color: #b8d9cd;
+  background: var(--green-soft);
+}
+
+.source-indicator-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--green-dark);
+  background: var(--soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.source-indicator.has-selection .source-indicator-icon {
+  color: #fff;
+  background: var(--green);
+}
+
+.source-indicator strong,
+.source-indicator small {
+  display: block;
+}
+
+.source-indicator strong {
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.source-indicator small {
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .primary-button,
