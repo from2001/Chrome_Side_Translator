@@ -1,11 +1,11 @@
 import { INSTRUCTION_STORAGE_KEYS, requestOpenAI } from "./lib/openai.js";
-import { normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
+import { getCopyText, normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
 
 const API_KEY_STORAGE_KEY = "openaiApiKey";
 
 const elements = {
   keyNotice: document.querySelector("#key-notice"),
-  keyState: document.querySelector("#key-state"),
+  sourceIndicatorLabel: document.querySelector("#source-indicator-label"),
   translateButton: document.querySelector("#translate-button"),
   summarizeButton: document.querySelector("#summarize-button"),
   progressCard: document.querySelector("#progress-card"),
@@ -15,39 +15,139 @@ const elements = {
   errorMessage: document.querySelector("#error-message"),
   resultCard: document.querySelector("#result-card"),
   resultMode: document.querySelector("#result-mode"),
+  resultTitle: document.querySelector("#result-title"),
   sourceMeta: document.querySelector("#source-meta"),
   resultOutput: document.querySelector("#result-output"),
-  copyButton: document.querySelector("#copy-button")
+  copyMenus: Array.from(document.querySelectorAll(".copy-menu")),
+  copyMenuTriggers: Array.from(document.querySelectorAll(".copy-menu > summary")),
+  copyButtons: Array.from(document.querySelectorAll("[data-copy-format]"))
 };
 
 let activeController = null;
 let currentResultText = "";
+let sourceRefreshSequence = 0;
+let copyFeedbackTimer = null;
 
 initialize();
 
 async function initialize() {
-  await refreshKeyState();
+  await Promise.all([refreshKeyState(), refreshSourceIndicator()]);
 
   document.querySelectorAll("#open-settings, #notice-settings, #footer-settings")
     .forEach((button) => button.addEventListener("click", () => chrome.runtime.openOptionsPage()));
 
   elements.translateButton.addEventListener("click", () => processPage("translate"));
   elements.summarizeButton.addEventListener("click", () => processPage("summarize"));
-  elements.copyButton.addEventListener("click", copyResult);
+  elements.copyButtons.forEach((button) => {
+    button.addEventListener("click", () => copyResult(button.dataset.copyFormat));
+  });
+  document.addEventListener("click", (event) => {
+    elements.copyMenus.forEach((menu) => {
+      if (!menu.contains(event.target)) {
+        menu.open = false;
+      }
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    const openMenu = elements.copyMenus.find((menu) => menu.open);
+    if (event.key === "Escape" && openMenu) {
+      openMenu.open = false;
+      openMenu.querySelector("summary").focus();
+    }
+  });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local" && changes[API_KEY_STORAGE_KEY]) {
       refreshKeyState();
     }
   });
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message && message.type === "selection-state-changed") {
+      refreshSourceIndicator();
+    }
+  });
+
+  chrome.tabs.onActivated.addListener(refreshSourceIndicator);
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+    if (changeInfo.status === "complete") {
+      refreshSourceIndicator();
+    }
+  });
+  window.addEventListener("focus", refreshSourceIndicator);
+}
+
+async function refreshSourceIndicator() {
+  const sequence = ++sourceRefreshSequence;
+  let selectionLength = 0;
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id && /^https?:\/\//i.test(tab.url || "")) {
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: inspectSelectionOnPage
+      });
+      selectionLength = injection && injection.result ? injection.result.length : 0;
+    }
+  } catch {
+    selectionLength = 0;
+  }
+
+  if (sequence !== sourceRefreshSequence) {
+    return;
+  }
+
+  const hasSelection = selectionLength > 0;
+  elements.sourceIndicatorLabel.textContent = hasSelection
+    ? `選択範囲を処理します ${selectionLength.toLocaleString("ja-JP")}文字を選択中`
+    : "ページ本文を処理します";
+}
+
+function inspectSelectionOnPage() {
+  const monitorKey = "__sideTranslatorSelectionMonitorInstalled";
+
+  if (!globalThis[monitorKey]) {
+    globalThis[monitorKey] = true;
+    let reportScheduled = false;
+
+    const scheduleReport = () => {
+      if (reportScheduled) {
+        return;
+      }
+
+      reportScheduled = true;
+      window.requestAnimationFrame(() => {
+        reportScheduled = false;
+        chrome.runtime.sendMessage({ type: "selection-state-changed" }).catch(() => {});
+      });
+    };
+
+    document.addEventListener("selectionchange", scheduleReport);
+    document.addEventListener("select", scheduleReport, true);
+  }
+
+  return { length: getSelectedText().trim().length };
+
+  function getSelectedText() {
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === "TEXTAREA" || activeElement.tagName === "INPUT")) {
+      const start = activeElement.selectionStart;
+      const end = activeElement.selectionEnd;
+      if (typeof start === "number" && typeof end === "number" && end > start) {
+        return activeElement.value.slice(start, end);
+      }
+    }
+
+    const selection = window.getSelection();
+    return selection && !selection.isCollapsed ? selection.toString() : "";
+  }
 }
 
 async function refreshKeyState() {
   const stored = await chrome.storage.local.get(API_KEY_STORAGE_KEY);
   const hasKey = Boolean(stored[API_KEY_STORAGE_KEY]);
   elements.keyNotice.hidden = hasKey;
-  elements.keyState.textContent = hasKey ? "API設定済み" : "未設定";
-  elements.keyState.classList.toggle("is-ready", hasKey);
   return stored[API_KEY_STORAGE_KEY] || "";
 }
 
@@ -66,17 +166,18 @@ async function processPage(mode) {
   setBusy(true);
   hideError();
   elements.resultCard.hidden = true;
-  updateProgress("本文を抽出しています", "ページのメインコンテンツを解析中です。");
+  updateProgress("テキストを抽出しています", "選択範囲またはページのメインコンテンツを解析中です。");
 
   try {
     const page = await extractCurrentPage();
-    if (!page.content || page.content.length < 40) {
+    if (!page.content || (page.sourceType !== "selection" && page.content.length < 40)) {
       throw new Error("このページから十分な本文を抽出できませんでした。");
     }
 
+    const sourceLabel = page.sourceType === "selection" ? "選択範囲" : "ページ本文";
     updateProgress(
       mode === "translate" ? "日本語に翻訳しています" : "日本語で要約しています",
-      `${page.content.length.toLocaleString("ja-JP")}文字を gpt-5.4-nano へ送信しています。`
+      `${sourceLabel}の${page.content.length.toLocaleString("ja-JP")}文字を gpt-5.4-nano へ送信しています。`
     );
 
     const instructionKey = INSTRUCTION_STORAGE_KEYS[mode];
@@ -157,7 +258,28 @@ function extractMainContentFromPage() {
       language: document.documentElement.lang || "unknown",
       content: "",
       truncated: false,
-      originalLength: 0
+      originalLength: 0,
+      sourceType: "page"
+    };
+  }
+
+  const selectedText = normalize(getSelectedText());
+  if (selectedText) {
+    const boundary = selectedText.lastIndexOf("\n", MAX_CHARACTERS);
+    const cutAt = boundary >= MAX_CHARACTERS * 0.8 ? boundary : MAX_CHARACTERS;
+    const truncated = selectedText.length > MAX_CHARACTERS;
+    const content = truncated
+      ? `${selectedText.slice(0, cutAt).trim()}\n\n[Content truncated by the extension]`
+      : selectedText;
+
+    return {
+      title: document.title || location.hostname,
+      url: location.href,
+      language: document.documentElement.lang || "unknown",
+      content,
+      truncated,
+      originalLength: selectedText.length,
+      sourceType: "selection"
     };
   }
 
@@ -222,8 +344,23 @@ function extractMainContentFromPage() {
     language: document.documentElement.lang || "unknown",
     content,
     truncated,
-    originalLength: fullText.length
+    originalLength: fullText.length,
+    sourceType: "page"
   };
+
+  function getSelectedText() {
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === "TEXTAREA" || activeElement.tagName === "INPUT")) {
+      const start = activeElement.selectionStart;
+      const end = activeElement.selectionEnd;
+      if (typeof start === "number" && typeof end === "number" && end > start) {
+        return activeElement.value.slice(start, end);
+      }
+    }
+
+    const selection = window.getSelection();
+    return selection && !selection.isCollapsed ? selection.toString() : "";
+  }
 
   function normalize(value) {
     return String(value || "")
@@ -248,8 +385,17 @@ function updateProgress(title, detail) {
 
 function showResult(mode, page, output) {
   currentResultText = normalizeModelOutput(output);
+  window.clearTimeout(copyFeedbackTimer);
+  elements.copyMenus.forEach((menu) => {
+    menu.open = false;
+  });
+  elements.copyMenuTriggers.forEach((trigger) => {
+    trigger.textContent = "コピー";
+  });
   elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : "SUMMARY";
-  elements.sourceMeta.textContent = `${page.title} · ${page.content.length.toLocaleString("ja-JP")}文字${page.truncated ? "（上限で省略）" : ""}`;
+  elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : "要約結果";
+  const sourceLabel = page.sourceType === "selection" ? "選択範囲" : "ページ本文";
+  elements.sourceMeta.textContent = `${sourceLabel} · ${page.title} · ${page.content.length.toLocaleString("ja-JP")}文字${page.truncated ? "（上限で省略）" : ""}`;
   renderMarkdown(elements.resultOutput, currentResultText);
   elements.resultCard.hidden = false;
   elements.resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -278,14 +424,30 @@ function toUserMessage(error) {
   return error.message || "予期しないエラーが発生しました。";
 }
 
-async function copyResult() {
-  const text = elements.resultOutput.innerText.trim() || currentResultText;
+async function copyResult(format) {
+  const text = getCopyText(format, elements.resultOutput.innerText, currentResultText);
   if (!text) {
     return;
   }
-  await navigator.clipboard.writeText(text);
-  elements.copyButton.textContent = "コピー済み";
-  window.setTimeout(() => {
-    elements.copyButton.textContent = "コピー";
-  }, 1600);
+
+  try {
+    await navigator.clipboard.writeText(text);
+    elements.copyMenus.forEach((menu) => {
+      menu.open = false;
+    });
+    elements.copyMenuTriggers.forEach((trigger) => {
+      trigger.textContent = "コピー済み";
+    });
+    window.clearTimeout(copyFeedbackTimer);
+    copyFeedbackTimer = window.setTimeout(() => {
+      elements.copyMenuTriggers.forEach((trigger) => {
+        trigger.textContent = "コピー";
+      });
+    }, 1600);
+  } catch {
+    elements.copyMenus.forEach((menu) => {
+      menu.open = false;
+    });
+    showError("クリップボードへコピーできませんでした。もう一度お試しください。");
+  }
 }

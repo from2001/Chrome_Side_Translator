@@ -9,7 +9,7 @@
   <body class="panel-page">
     <header class="app-header">
       <div>
-        <p class="eyebrow">OPENAI POWERED</p>
+        <p class="eyebrow">BUILT FOR CHROME</p>
         <h1>Side Translator</h1>
       </div>
       <button id="open-settings" class="icon-button" type="button" aria-label="設定を開く" title="設定を開く">
@@ -24,35 +24,6 @@
           <p>翻訳・要約にはOpenAI APIキーが必要です。</p>
         </div>
         <button id="notice-settings" class="text-button" type="button">設定</button>
-      </section>
-
-      <section class="action-card" aria-labelledby="action-title">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">CURRENT PAGE</p>
-            <h2 id="action-title">表示中のページを処理</h2>
-          </div>
-          <span id="key-state" class="status-badge">確認中</span>
-        </div>
-
-        <p class="helper-text">ヘッダー、フッター、ナビゲーションなどを除き、本文として判定した内容を送信します。</p>
-
-        <div class="action-grid">
-          <button id="translate-button" class="primary-button" type="button" data-mode="translate">
-            <span class="button-icon" aria-hidden="true">文</span>
-            <span>
-              <strong>日本語に翻訳</strong>
-              <small>構造を保って自然な日本語へ</small>
-            </span>
-          </button>
-          <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
-            <span class="button-icon" aria-hidden="true">要</span>
-            <span>
-              <strong>日本語で要約</strong>
-              <small>概要と重要ポイントを整理</small>
-            </span>
-          </button>
-        </div>
       </section>
 
       <section id="progress-card" class="progress-card" aria-live="polite" hidden>
@@ -72,19 +43,55 @@
         <div class="result-header">
           <div>
             <p id="result-mode" class="section-kicker">TRANSLATION</p>
-            <h2 id="result-title">処理結果</h2>
+            <h2 id="result-title">翻訳結果</h2>
           </div>
-          <button id="copy-button" class="text-button" type="button">コピー</button>
+          <details class="copy-menu">
+            <summary>コピー</summary>
+            <div class="copy-options" aria-label="コピー形式">
+              <button type="button" data-copy-format="text">テキストとしてコピー</button>
+              <button type="button" data-copy-format="markdown">Markdownとしてコピー</button>
+            </div>
+          </details>
         </div>
         <div id="source-meta" class="source-meta"></div>
         <div id="result-output" class="result-output" tabindex="0"></div>
+        <div class="result-footer">
+          <details class="copy-menu">
+            <summary>コピー</summary>
+            <div class="copy-options" aria-label="コピー形式">
+              <button type="button" data-copy-format="text">テキストとしてコピー</button>
+              <button type="button" data-copy-format="markdown">Markdownとしてコピー</button>
+            </div>
+          </details>
+        </div>
       </section>
     </main>
 
-    <footer class="app-footer">
-      <span>Model: <code>gpt-5.4-nano</code></span>
-      <button id="footer-settings" class="link-button" type="button">API設定</button>
-    </footer>
+    <div class="action-dock" role="region" aria-label="ページの処理操作">
+      <div id="source-indicator" class="source-indicator" aria-live="polite">
+        <strong id="source-indicator-label">ページ本文を処理します</strong>
+      </div>
+
+      <div class="action-grid">
+        <button id="translate-button" class="primary-button" type="button" data-mode="translate">
+          <span class="button-icon" aria-hidden="true">翻</span>
+          <span>
+            <strong>日本語に翻訳</strong>
+          </span>
+        </button>
+        <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
+          <span class="button-icon" aria-hidden="true">要</span>
+          <span>
+            <strong>日本語で要約</strong>
+          </span>
+        </button>
+      </div>
+
+      <footer class="app-footer">
+        <span>Model: <code>gpt-5.4-nano</code></span>
+        <button id="footer-settings" class="link-button" type="button">API設定</button>
+      </footer>
+    </div>
 
     <script type="module" src="sidepanel.js"></script>
   </body>

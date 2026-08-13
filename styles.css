@@ -105,7 +105,7 @@ p {
 }
 
 .panel-page main {
-  padding: 18px;
+  padding: 18px 18px 260px;
 }
 
 .notice,
@@ -134,7 +134,6 @@ p {
   line-height: 1.5;
 }
 
-.action-card,
 .result-card {
   padding: 18px;
   border: 1px solid rgba(215, 224, 220, 0.95);
@@ -143,7 +142,6 @@ p {
   box-shadow: var(--shadow);
 }
 
-.section-heading,
 .result-header {
   display: flex;
   gap: 12px;
@@ -151,38 +149,123 @@ p {
   justify-content: space-between;
 }
 
-.section-heading h2,
 .result-header h2 {
   margin: 0;
   font-size: 17px;
   letter-spacing: -0.02em;
 }
 
-.status-badge {
+.copy-menu {
+  position: relative;
   flex: 0 0 auto;
-  padding: 5px 8px;
-  border-radius: 999px;
-  color: var(--muted);
-  background: var(--soft);
-  font-size: 10px;
-  font-weight: 700;
 }
 
-.status-badge.is-ready {
+.copy-menu summary {
+  padding: 4px;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.copy-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.copy-menu summary::after {
+  margin-left: 4px;
+  content: "▾";
+  font-size: 9px;
+}
+
+.copy-menu[open] summary,
+.copy-menu summary:hover {
+  color: var(--green);
+}
+
+.copy-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  width: 180px;
+  overflow: hidden;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(30, 55, 48, 0.16);
+}
+
+.copy-options button {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  text-align: left;
+  color: var(--ink);
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 12px;
+}
+
+.copy-options button:hover,
+.copy-options button:focus-visible {
   color: var(--green-dark);
   background: var(--green-soft);
+  outline: none;
 }
 
-.helper-text {
-  margin: 14px 0 16px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.65;
+.result-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.result-footer .copy-options {
+  top: auto;
+  bottom: calc(100% + 6px);
 }
 
 .action-grid {
   display: grid;
   gap: 10px;
+}
+
+.action-dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  padding: 14px 18px max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(209, 220, 216, 0.95);
+  background: rgba(247, 249, 248, 0.96);
+  box-shadow: 0 -10px 30px rgba(30, 55, 48, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.source-indicator {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.source-indicator strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .primary-button,
@@ -241,23 +324,13 @@ p {
 }
 
 .primary-button strong,
-.secondary-button strong,
-.primary-button small,
-.secondary-button small {
+.secondary-button strong {
   display: block;
 }
 
 .primary-button strong,
 .secondary-button strong {
-  margin-bottom: 3px;
   font-size: 14px;
-}
-
-.primary-button small,
-.secondary-button small {
-  color: inherit;
-  font-size: 11px;
-  opacity: 0.76;
 }
 
 .progress-card {
@@ -430,7 +503,7 @@ p {
 .app-footer {
   display: flex;
   justify-content: space-between;
-  padding: 6px 20px 20px;
+  padding: 9px 2px 0;
   color: var(--muted);
   font-size: 10px;
 }
