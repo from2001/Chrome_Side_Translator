@@ -26,35 +26,6 @@
         <button id="notice-settings" class="text-button" type="button">設定</button>
       </section>
 
-      <section class="action-card" aria-labelledby="action-title">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">CURRENT PAGE</p>
-            <h2 id="action-title">表示中のページを処理</h2>
-          </div>
-          <span id="key-state" class="status-badge">確認中</span>
-        </div>
-
-        <p class="helper-text">ヘッダー、フッター、ナビゲーションなどを除き、本文として判定した内容を送信します。</p>
-
-        <div class="action-grid">
-          <button id="translate-button" class="primary-button" type="button" data-mode="translate">
-            <span class="button-icon" aria-hidden="true">文</span>
-            <span>
-              <strong>日本語に翻訳</strong>
-              <small>構造を保って自然な日本語へ</small>
-            </span>
-          </button>
-          <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
-            <span class="button-icon" aria-hidden="true">要</span>
-            <span>
-              <strong>日本語で要約</strong>
-              <small>概要と重要ポイントを整理</small>
-            </span>
-          </button>
-        </div>
-      </section>
-
       <section id="progress-card" class="progress-card" aria-live="polite" hidden>
         <div class="spinner" aria-hidden="true"></div>
         <div>
@@ -81,10 +52,29 @@
       </section>
     </main>
 
-    <footer class="app-footer">
-      <span>Model: <code>gpt-5.4-nano</code></span>
-      <button id="footer-settings" class="link-button" type="button">API設定</button>
-    </footer>
+    <div class="action-dock" role="region" aria-label="ページの処理操作">
+      <div class="action-grid">
+        <button id="translate-button" class="primary-button" type="button" data-mode="translate">
+          <span class="button-icon" aria-hidden="true">文</span>
+          <span>
+            <strong>日本語に翻訳</strong>
+            <small>構造を保って自然な日本語へ</small>
+          </span>
+        </button>
+        <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
+          <span class="button-icon" aria-hidden="true">要</span>
+          <span>
+            <strong>日本語で要約</strong>
+            <small>概要と重要ポイントを整理</small>
+          </span>
+        </button>
+      </div>
+
+      <footer class="app-footer">
+        <span>Model: <code>gpt-5.4-nano</code></span>
+        <button id="footer-settings" class="link-button" type="button">API設定</button>
+      </footer>
+    </div>
 
     <script type="module" src="sidepanel.js"></script>
   </body>
