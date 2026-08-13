@@ -5,10 +5,7 @@ const API_KEY_STORAGE_KEY = "openaiApiKey";
 
 const elements = {
   keyNotice: document.querySelector("#key-notice"),
-  sourceIndicator: document.querySelector("#source-indicator"),
-  sourceIndicatorIcon: document.querySelector("#source-indicator-icon"),
   sourceIndicatorLabel: document.querySelector("#source-indicator-label"),
-  sourceIndicatorDetail: document.querySelector("#source-indicator-detail"),
   translateButton: document.querySelector("#translate-button"),
   summarizeButton: document.querySelector("#summarize-button"),
   progressCard: document.querySelector("#progress-card"),
@@ -18,6 +15,7 @@ const elements = {
   errorMessage: document.querySelector("#error-message"),
   resultCard: document.querySelector("#result-card"),
   resultMode: document.querySelector("#result-mode"),
+  resultTitle: document.querySelector("#result-title"),
   sourceMeta: document.querySelector("#source-meta"),
   resultOutput: document.querySelector("#result-output"),
   copyButton: document.querySelector("#copy-button")
@@ -82,14 +80,9 @@ async function refreshSourceIndicator() {
   }
 
   const hasSelection = selectionLength > 0;
-  elements.sourceIndicator.classList.toggle("has-selection", hasSelection);
-  elements.sourceIndicatorIcon.textContent = hasSelection ? "選" : "頁";
   elements.sourceIndicatorLabel.textContent = hasSelection
-    ? "選択範囲を処理します"
+    ? `選択範囲を処理します ${selectionLength.toLocaleString("ja-JP")}文字を選択中`
     : "ページ本文を処理します";
-  elements.sourceIndicatorDetail.textContent = hasSelection
-    ? `${selectionLength.toLocaleString("ja-JP")}文字を選択中`
-    : "テキストを選択すると、その範囲だけを処理します";
 }
 
 function inspectSelectionOnPage() {
@@ -374,6 +367,7 @@ function updateProgress(title, detail) {
 function showResult(mode, page, output) {
   currentResultText = normalizeModelOutput(output);
   elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : "SUMMARY";
+  elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : "要約結果";
   const sourceLabel = page.sourceType === "selection" ? "選択範囲" : "ページ本文";
   elements.sourceMeta.textContent = `${sourceLabel} · ${page.title} · ${page.content.length.toLocaleString("ja-JP")}文字${page.truncated ? "（上限で省略）" : ""}`;
   renderMarkdown(elements.resultOutput, currentResultText);

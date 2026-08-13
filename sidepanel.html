@@ -43,7 +43,7 @@
         <div class="result-header">
           <div>
             <p id="result-mode" class="section-kicker">TRANSLATION</p>
-            <h2 id="result-title">処理結果</h2>
+            <h2 id="result-title">翻訳結果</h2>
           </div>
           <button id="copy-button" class="text-button" type="button">コピー</button>
         </div>
@@ -54,26 +54,20 @@
 
     <div class="action-dock" role="region" aria-label="ページの処理操作">
       <div id="source-indicator" class="source-indicator" aria-live="polite">
-        <span id="source-indicator-icon" class="source-indicator-icon" aria-hidden="true">頁</span>
-        <span>
-          <strong id="source-indicator-label">ページ本文を処理します</strong>
-          <small id="source-indicator-detail">テキストを選択すると、その範囲だけを処理します</small>
-        </span>
+        <strong id="source-indicator-label">ページ本文を処理します</strong>
       </div>
 
       <div class="action-grid">
         <button id="translate-button" class="primary-button" type="button" data-mode="translate">
-          <span class="button-icon" aria-hidden="true">文</span>
+          <span class="button-icon" aria-hidden="true">翻</span>
           <span>
             <strong>日本語に翻訳</strong>
-            <small>構造を保って自然な日本語へ</small>
           </span>
         </button>
         <button id="summarize-button" class="secondary-button" type="button" data-mode="summarize">
           <span class="button-icon" aria-hidden="true">要</span>
           <span>
             <strong>日本語で要約</strong>
-            <small>概要と重要ポイントを整理</small>
           </span>
         </button>
       </div>
