@@ -11,3 +11,19 @@ test("manifest grants persistent access to translatable web pages", async () => 
   assert.ok(manifest.host_permissions.includes("http://*/*"));
   assert.ok(manifest.host_permissions.includes("https://*/*"));
 });
+
+test("manifest declares extension and toolbar icons", async () => {
+  const source = await readFile(new URL("../manifest.json", import.meta.url), "utf8");
+  const manifest = JSON.parse(source);
+
+  assert.deepEqual(manifest.icons, {
+    16: "assets/icons/icon-16.png",
+    32: "assets/icons/icon-32.png",
+    48: "assets/icons/icon-48.png",
+    128: "assets/icons/icon-128.png",
+  });
+  assert.deepEqual(manifest.action.default_icon, {
+    16: "assets/icons/icon-16.png",
+    32: "assets/icons/icon-32.png",
+  });
+});
