@@ -45,10 +45,25 @@
             <p id="result-mode" class="section-kicker">TRANSLATION</p>
             <h2 id="result-title">翻訳結果</h2>
           </div>
-          <button id="copy-button" class="text-button" type="button">コピー</button>
+          <details class="copy-menu">
+            <summary>コピー</summary>
+            <div class="copy-options" aria-label="コピー形式">
+              <button type="button" data-copy-format="text">テキストとしてコピー</button>
+              <button type="button" data-copy-format="markdown">Markdownとしてコピー</button>
+            </div>
+          </details>
         </div>
         <div id="source-meta" class="source-meta"></div>
         <div id="result-output" class="result-output" tabindex="0"></div>
+        <div class="result-footer">
+          <details class="copy-menu">
+            <summary>コピー</summary>
+            <div class="copy-options" aria-label="コピー形式">
+              <button type="button" data-copy-format="text">テキストとしてコピー</button>
+              <button type="button" data-copy-format="markdown">Markdownとしてコピー</button>
+            </div>
+          </details>
+        </div>
       </section>
     </main>
 

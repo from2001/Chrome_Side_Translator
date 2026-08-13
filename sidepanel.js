@@ -1,5 +1,5 @@
 import { INSTRUCTION_STORAGE_KEYS, requestOpenAI } from "./lib/openai.js";
-import { normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
+import { getCopyText, normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
 
 const API_KEY_STORAGE_KEY = "openaiApiKey";
 
@@ -18,12 +18,15 @@ const elements = {
   resultTitle: document.querySelector("#result-title"),
   sourceMeta: document.querySelector("#source-meta"),
   resultOutput: document.querySelector("#result-output"),
-  copyButton: document.querySelector("#copy-button")
+  copyMenus: Array.from(document.querySelectorAll(".copy-menu")),
+  copyMenuTriggers: Array.from(document.querySelectorAll(".copy-menu > summary")),
+  copyButtons: Array.from(document.querySelectorAll("[data-copy-format]"))
 };
 
 let activeController = null;
 let currentResultText = "";
 let sourceRefreshSequence = 0;
+let copyFeedbackTimer = null;
 
 initialize();
 
@@ -35,7 +38,23 @@ async function initialize() {
 
   elements.translateButton.addEventListener("click", () => processPage("translate"));
   elements.summarizeButton.addEventListener("click", () => processPage("summarize"));
-  elements.copyButton.addEventListener("click", copyResult);
+  elements.copyButtons.forEach((button) => {
+    button.addEventListener("click", () => copyResult(button.dataset.copyFormat));
+  });
+  document.addEventListener("click", (event) => {
+    elements.copyMenus.forEach((menu) => {
+      if (!menu.contains(event.target)) {
+        menu.open = false;
+      }
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    const openMenu = elements.copyMenus.find((menu) => menu.open);
+    if (event.key === "Escape" && openMenu) {
+      openMenu.open = false;
+      openMenu.querySelector("summary").focus();
+    }
+  });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local" && changes[API_KEY_STORAGE_KEY]) {
@@ -366,6 +385,13 @@ function updateProgress(title, detail) {
 
 function showResult(mode, page, output) {
   currentResultText = normalizeModelOutput(output);
+  window.clearTimeout(copyFeedbackTimer);
+  elements.copyMenus.forEach((menu) => {
+    menu.open = false;
+  });
+  elements.copyMenuTriggers.forEach((trigger) => {
+    trigger.textContent = "コピー";
+  });
   elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : "SUMMARY";
   elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : "要約結果";
   const sourceLabel = page.sourceType === "selection" ? "選択範囲" : "ページ本文";
@@ -398,14 +424,30 @@ function toUserMessage(error) {
   return error.message || "予期しないエラーが発生しました。";
 }
 
-async function copyResult() {
-  const text = elements.resultOutput.innerText.trim() || currentResultText;
+async function copyResult(format) {
+  const text = getCopyText(format, elements.resultOutput.innerText, currentResultText);
   if (!text) {
     return;
   }
-  await navigator.clipboard.writeText(text);
-  elements.copyButton.textContent = "コピー済み";
-  window.setTimeout(() => {
-    elements.copyButton.textContent = "コピー";
-  }, 1600);
+
+  try {
+    await navigator.clipboard.writeText(text);
+    elements.copyMenus.forEach((menu) => {
+      menu.open = false;
+    });
+    elements.copyMenuTriggers.forEach((trigger) => {
+      trigger.textContent = "コピー済み";
+    });
+    window.clearTimeout(copyFeedbackTimer);
+    copyFeedbackTimer = window.setTimeout(() => {
+      elements.copyMenuTriggers.forEach((trigger) => {
+        trigger.textContent = "コピー";
+      });
+    }, 1600);
+  } catch {
+    elements.copyMenus.forEach((menu) => {
+      menu.open = false;
+    });
+    showError("クリップボードへコピーできませんでした。もう一度お試しください。");
+  }
 }

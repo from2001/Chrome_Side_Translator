@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { normalizeModelOutput, parseMarkdownBlocks } from "../lib/result-format.js";
+import { getCopyText, normalizeModelOutput, parseMarkdownBlocks } from "../lib/result-format.js";
 
 test("normalizeModelOutput extracts translated content from a legacy JSON response", () => {
   const result = normalizeModelOutput(JSON.stringify({
@@ -15,6 +15,17 @@ test("normalizeModelOutput extracts translated content from a legacy JSON respon
 
 test("normalizeModelOutput removes an outer Markdown code fence", () => {
   assert.equal(normalizeModelOutput("```markdown\n## 概要\n本文\n```"), "## 概要\n本文");
+});
+
+test("getCopyText preserves Markdown when that format is selected", () => {
+  assert.equal(
+    getCopyText("markdown", "概要\n項目A", "## 概要\n\n- **項目A**"),
+    "## 概要\n\n- **項目A**"
+  );
+});
+
+test("getCopyText returns rendered plain text without surrounding whitespace", () => {
+  assert.equal(getCopyText("text", "  概要\n項目A  ", "## 概要"), "概要\n項目A");
 });
 
 test("parseMarkdownBlocks recognizes headings, paragraphs, and lists", () => {
