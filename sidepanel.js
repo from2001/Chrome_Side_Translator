@@ -13,6 +13,12 @@ const elements = {
   gmailThreadSummaryButton: document.querySelector("#gmail-thread-summary-button"),
   gmailLatestSummaryButton: document.querySelector("#gmail-latest-summary-button"),
   gmailLatestTranslateButton: document.querySelector("#gmail-latest-translate-button"),
+  gmailReplyButton: document.querySelector("#gmail-reply-button"),
+  replyComposer: document.querySelector("#reply-composer"),
+  replyNotes: document.querySelector("#reply-notes"),
+  generateReplyButton: document.querySelector("#generate-reply-button"),
+  cancelReplyButton: document.querySelector("#cancel-reply-button"),
+  closeReplyComposerButton: document.querySelector("#close-reply-composer"),
   progressCard: document.querySelector("#progress-card"),
   progressTitle: document.querySelector("#progress-title"),
   progressDetail: document.querySelector("#progress-detail"),
@@ -48,6 +54,10 @@ async function initialize() {
   elements.gmailThreadSummaryButton.addEventListener("click", () => processPage("summarize", "thread"));
   elements.gmailLatestSummaryButton.addEventListener("click", () => processPage("summarize", "latest"));
   elements.gmailLatestTranslateButton.addEventListener("click", () => processPage("translate", "latest"));
+  elements.gmailReplyButton.addEventListener("click", openReplyComposer);
+  elements.generateReplyButton.addEventListener("click", generateReplyDraft);
+  elements.cancelReplyButton.addEventListener("click", closeReplyComposer);
+  elements.closeReplyComposerButton.addEventListener("click", closeReplyComposer);
   elements.copyButtons.forEach((button) => {
     button.addEventListener("click", () => copyResult(button.dataset.copyFormat));
   });
@@ -188,6 +198,9 @@ function renderSourceActions() {
   elements.pageActions.hidden = showGmailActions;
   elements.gmailActions.hidden = !showGmailActions;
   document.body.classList.toggle("gmail-actions-visible", showGmailActions);
+  if (!showGmailActions || !currentSourceState.hasGmailThread) {
+    closeReplyComposer();
+  }
 
   if (hasSelection) {
     elements.sourceIndicatorLabel.textContent = `選択範囲を処理します ${currentSourceState.selectionLength.toLocaleString("ja-JP")}文字を選択中`;
@@ -209,9 +222,40 @@ function updateActionAvailability() {
   elements.gmailThreadSummaryButton.disabled = gmailDisabled;
   elements.gmailLatestSummaryButton.disabled = gmailDisabled;
   elements.gmailLatestTranslateButton.disabled = gmailDisabled;
+  elements.gmailReplyButton.disabled = gmailDisabled;
+  elements.generateReplyButton.disabled = isBusy;
+  elements.cancelReplyButton.disabled = isBusy;
+  elements.closeReplyComposerButton.disabled = isBusy;
 }
 
-async function processPage(mode, gmailScope = null) {
+function openReplyComposer() {
+  if (!currentSourceState.hasGmailThread || isBusy) {
+    return;
+  }
+  hideError();
+  elements.replyComposer.hidden = false;
+  elements.replyNotes.focus();
+  elements.replyComposer.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function closeReplyComposer() {
+  if (isBusy) {
+    return;
+  }
+  elements.replyComposer.hidden = true;
+}
+
+async function generateReplyDraft() {
+  const replyNotes = elements.replyNotes.value.trim();
+  if (!replyNotes) {
+    showError("返信で伝えたい内容を入力してください。");
+    elements.replyNotes.focus();
+    return;
+  }
+  await processPage("reply", "thread", replyNotes);
+}
+
+async function processPage(mode, gmailScope = null, replyNotes = "") {
   if (activeController) {
     activeController.abort();
   }
@@ -226,7 +270,9 @@ async function processPage(mode, gmailScope = null) {
   setBusy(true);
   hideError();
   elements.resultCard.hidden = true;
-  const extractionDetail = gmailScope === "thread"
+  const extractionDetail = mode === "reply"
+    ? "メールスレッド全体を展開して、返信案に必要な文脈を解析中です。"
+    : gmailScope === "thread"
     ? "メールスレッドを展開して、すべてのメールを解析中です。"
     : gmailScope === "latest"
       ? "メールスレッドを展開して、最新のメールを解析中です。"
@@ -238,10 +284,17 @@ async function processPage(mode, gmailScope = null) {
     if (!page.content || (page.sourceType !== "selection" && page.content.length < 40)) {
       throw new Error("このページから十分な本文を抽出できませんでした。");
     }
+    if (mode === "reply") {
+      page.replyNotes = replyNotes;
+    }
 
     const sourceLabel = getSourceLabel(page.sourceType);
     updateProgress(
-      mode === "translate" ? "日本語に翻訳しています" : "日本語で要約しています",
+      mode === "translate"
+        ? "日本語に翻訳しています"
+        : mode === "reply"
+          ? "返信案を作成しています"
+          : "日本語で要約しています",
       `${sourceLabel}の${page.content.length.toLocaleString("ja-JP")}文字を gpt-5.4-nano へ送信しています。`
     );
 
@@ -693,8 +746,8 @@ function showResult(mode, page, output) {
   elements.copyMenuTriggers.forEach((trigger) => {
     trigger.textContent = "コピー";
   });
-  elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : "SUMMARY";
-  elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : "要約結果";
+  elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : mode === "reply" ? "REPLY DRAFT" : "SUMMARY";
+  elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : mode === "reply" ? "返信案" : "要約結果";
   const sourceLabel = getSourceLabel(page.sourceType);
   const messageCount = page.messageCount ? ` · ${page.messageCount.toLocaleString("ja-JP")}通` : "";
   elements.sourceMeta.textContent = `${sourceLabel} · ${page.title}${messageCount} · ${page.content.length.toLocaleString("ja-JP")}文字${page.truncated ? "（上限で省略）" : ""}`;

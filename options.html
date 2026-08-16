@@ -29,7 +29,7 @@
           <div class="settings-section-heading">
             <div>
               <h2 id="instruction-settings-title">Instructions</h2>
-              <p>OpenAI APIへ送る翻訳・要約の指示を編集できます。</p>
+              <p>OpenAI APIへ送る翻訳・要約・返信案作成の指示を編集できます。</p>
             </div>
             <button id="reset-instructions" class="text-button" type="button">既定値に戻す</button>
           </div>
@@ -39,6 +39,9 @@
 
           <label for="summarize-instruction">要約用</label>
           <textarea id="summarize-instruction" name="summarizeInstruction" rows="8" spellcheck="true" required></textarea>
+
+          <label for="reply-instruction">返信案作成用</label>
+          <textarea id="reply-instruction" name="replyInstruction" rows="8" spellcheck="true" required></textarea>
         </section>
 
         <div class="settings-actions">
@@ -50,7 +53,7 @@
 
       <aside class="privacy-note">
         <h2>データの取り扱い</h2>
-        <p>翻訳・要約を実行すると、抽出したページ本文と設定したInstructionがOpenAI APIへ送信されます。ページタイトルとURLは送信されません。機密情報を含むページでは実行しないでください。</p>
+        <p>翻訳・要約・返信案作成を実行すると、抽出した本文、返信で伝えたい内容、設定したInstructionがOpenAI APIへ送信されます。ページタイトルとURLは送信されません。機密情報を含むページでは実行しないでください。</p>
       </aside>
     </main>
 

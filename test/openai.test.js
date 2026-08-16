@@ -31,6 +31,23 @@ test("buildResponseRequest uses a custom instruction for each operation", () => 
   assert.equal(request.max_output_tokens, 6000);
 });
 
+test("buildResponseRequest separates an untrusted email thread from reply requirements", () => {
+  const request = buildResponseRequest("reply", {
+    title: "Private subject",
+    url: "https://mail.google.com/private-thread",
+    content: "Earlier message\nLatest question",
+    replyNotes: "Thank them and confirm Tuesday."
+  });
+
+  assert.equal(request.instructions, DEFAULT_INSTRUCTIONS.reply);
+  assert.match(request.instructions, /メールスレッド全体の文脈/);
+  assert.equal(request.max_output_tokens, 6000);
+  assert.match(request.input, /^EMAIL_THREAD_UNTRUSTED:/);
+  assert.match(request.input, /Earlier message\nLatest question/);
+  assert.match(request.input, /USER_REPLY_REQUIREMENTS:\n\nThank them and confirm Tuesday\./);
+  assert.doesNotMatch(request.input, /Private subject|mail\.google\.com/);
+});
+
 test("extractResponseText combines message text and ignores reasoning output", () => {
   const text = extractResponseText({
     output: [
