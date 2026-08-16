@@ -8,6 +8,7 @@ A Manifest V3 Chrome extension that opens in the browser side panel and uses the
 
 - Opens from the extension toolbar button in Chrome's side panel.
 - Extracts likely article or main-page content while removing headers, footers, navigation, advertisements, forms, and similar chrome.
+- Shows Gmail-specific actions when no text is selected: summarize the full thread, summarize the latest message, or translate the latest message.
 - Translates the extracted content into Japanese while preserving its structure.
 - Summarizes the extracted content in Japanese with an overview and key points.
 - Lets users customize the translation and summarization instructions from the settings page.
@@ -44,6 +45,8 @@ The API key is stored in Chrome local extension storage, not sync storage. It is
 ## Content extraction
 
 The extractor scores semantic candidates such as `article`, `main`, and `[role="main"]`, considers text length and link density, removes common non-content elements, and sends at most 100,000 characters per request. Extraction is heuristic and can be imperfect on highly interactive applications or pages with unusual markup.
+
+On Gmail, a text selection continues to take priority. Without a selection, the extension detects the open conversation, expands it, and extracts either every visible message or the latest message according to the selected Gmail action. Message bodies are sent with available sender, recipient, date, and attachment-name metadata; attachment contents are not read.
 
 Chrome internal pages, the Chrome Web Store, local browser pages, and other restricted URLs cannot be inspected by extensions.
 

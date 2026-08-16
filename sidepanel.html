@@ -75,7 +75,7 @@
         <strong id="source-indicator-label">ページ本文を処理します</strong>
       </div>
 
-      <div class="action-grid">
+      <div id="page-actions" class="action-grid">
         <button id="translate-button" class="primary-button" type="button" data-mode="translate">
           <span class="button-icon" aria-hidden="true">翻</span>
           <span>
@@ -86,6 +86,27 @@
           <span class="button-icon" aria-hidden="true">要</span>
           <span>
             <strong>日本語で要約</strong>
+          </span>
+        </button>
+      </div>
+
+      <div id="gmail-actions" class="action-grid" hidden>
+        <button id="gmail-thread-summary-button" class="primary-button" type="button">
+          <span class="button-icon" aria-hidden="true">全</span>
+          <span>
+            <strong>メールスレッド全体を要約</strong>
+          </span>
+        </button>
+        <button id="gmail-latest-summary-button" class="secondary-button" type="button">
+          <span class="button-icon" aria-hidden="true">新</span>
+          <span>
+            <strong>最新のメールを要約</strong>
+          </span>
+        </button>
+        <button id="gmail-latest-translate-button" class="secondary-button" type="button">
+          <span class="button-icon" aria-hidden="true">翻</span>
+          <span>
+            <strong>最新のメールを翻訳</strong>
           </span>
         </button>
       </div>
