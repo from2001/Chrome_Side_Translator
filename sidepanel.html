@@ -24,9 +24,26 @@
       <section id="key-notice" class="notice" hidden>
         <div>
           <strong>APIキーを設定してください</strong>
-          <p>翻訳・要約にはOpenAI APIキーが必要です。</p>
+          <p>翻訳・要約・返信案作成にはOpenAI APIキーが必要です。</p>
         </div>
         <button id="notice-settings" class="text-button" type="button">設定</button>
+      </section>
+
+      <section id="reply-composer" class="reply-composer" aria-labelledby="reply-composer-title" hidden>
+        <div class="reply-composer-header">
+          <div>
+            <p class="section-kicker">REPLY DRAFT</p>
+            <h2 id="reply-composer-title">返信で伝えたい内容</h2>
+          </div>
+          <button id="close-reply-composer" class="text-button" type="button">閉じる</button>
+        </div>
+        <label for="reply-notes">返信内容や要点を入力してください</label>
+        <textarea id="reply-notes" rows="7" maxlength="10000" spellcheck="true" placeholder="例：書類を確認したことへのお礼と、8月19日にバルセロナへ到着予定であることを丁寧な英語で伝える"></textarea>
+        <p class="field-note">表示中のメールスレッド全体と、この入力内容をOpenAI APIへ送信して返信案を作成します。</p>
+        <div class="reply-composer-actions">
+          <button id="generate-reply-button" class="primary-save-button" type="button">返信案を作成</button>
+          <button id="cancel-reply-button" class="text-button" type="button">キャンセル</button>
+        </div>
       </section>
 
       <section id="progress-card" class="progress-card" aria-live="polite" hidden>
@@ -107,6 +124,12 @@
           <span class="button-icon" aria-hidden="true">翻</span>
           <span>
             <strong>最新のメールを翻訳</strong>
+          </span>
+        </button>
+        <button id="gmail-reply-button" class="secondary-button" type="button">
+          <span class="button-icon" aria-hidden="true">返</span>
+          <span>
+            <strong>返信案を作成</strong>
           </span>
         </button>
       </div>

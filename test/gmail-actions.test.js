@@ -9,7 +9,7 @@ const gmailExtractionStart = sidepanelSource.indexOf("async function extractGmai
 const gmailExtractionEnd = sidepanelSource.indexOf("\nfunction extractMainContentFromPage() {", gmailExtractionStart);
 const gmailExtractionFunctionSource = sidepanelSource.slice(gmailExtractionStart, gmailExtractionEnd);
 
-test("side panel includes the three Gmail thread actions", async () => {
+test("side panel includes Gmail translation, summary, and reply actions", async () => {
   const source = await readFile(new URL("../sidepanel.html", import.meta.url), "utf8");
 
   assert.match(source, /id="gmail-thread-summary-button"/);
@@ -18,6 +18,17 @@ test("side panel includes the three Gmail thread actions", async () => {
   assert.match(source, />最新のメールを要約</);
   assert.match(source, /id="gmail-latest-translate-button"/);
   assert.match(source, />最新のメールを翻訳</);
+  assert.match(source, /id="gmail-reply-button"/);
+  assert.match(source, />返信案を作成</);
+});
+
+test("side panel includes reply requirements input without a send action", async () => {
+  const source = await readFile(new URL("../sidepanel.html", import.meta.url), "utf8");
+
+  assert.match(source, /id="reply-composer"[^>]*hidden/);
+  assert.match(source, /id="reply-notes"[^>]*maxlength="10000"/);
+  assert.match(source, /id="generate-reply-button"/);
+  assert.doesNotMatch(source, /メールを送信|send-reply-button/);
 });
 
 test("Gmail actions are hidden until the source is identified", async () => {

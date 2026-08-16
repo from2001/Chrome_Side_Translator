@@ -123,7 +123,7 @@ p {
 }
 
 .panel-page.gmail-actions-visible main {
-  padding-bottom: 340px;
+  padding-bottom: 290px;
 }
 
 .notice,
@@ -158,6 +158,63 @@ p {
   border-radius: 18px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.reply-composer {
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid rgba(215, 224, 220, 0.95);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.reply-composer-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.reply-composer-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.reply-composer label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.reply-composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  resize: vertical;
+  color: var(--ink);
+  border: 1px solid #cfd9d5;
+  border-radius: 12px;
+  outline: none;
+  line-height: 1.6;
+}
+
+.reply-composer textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(18, 107, 85, 0.12);
+}
+
+.reply-composer .field-note {
+  margin-bottom: 14px;
+}
+
+.reply-composer-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .result-header {
@@ -251,6 +308,27 @@ p {
 .action-grid {
   display: grid;
   gap: 10px;
+}
+
+#gmail-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#gmail-actions .primary-button,
+#gmail-actions .secondary-button {
+  min-height: 66px;
+  gap: 8px;
+  padding: 10px;
+}
+
+#gmail-actions .button-icon {
+  width: 30px;
+  height: 30px;
+}
+
+#gmail-actions strong {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .action-dock {
