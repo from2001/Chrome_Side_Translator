@@ -122,6 +122,10 @@ p {
   padding: 18px 18px 260px;
 }
 
+.panel-page.gmail-actions-visible main {
+  padding-bottom: 340px;
+}
+
 .notice,
 .progress-card,
 .error-card {

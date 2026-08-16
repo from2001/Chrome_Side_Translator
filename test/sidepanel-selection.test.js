@@ -73,7 +73,15 @@ test("selection inspection reports the selected character count", () => {
     },
     document: {
       activeElement: null,
-      addEventListener() {}
+      addEventListener() {},
+      body: {},
+      querySelector() {
+        return null;
+      }
+    },
+    location: { hostname: "example.com" },
+    MutationObserver: class {
+      observe() {}
     },
     window: {
       requestAnimationFrame() {},
@@ -89,5 +97,46 @@ test("selection inspection reports the selected character count", () => {
   };
   const inspect = vm.runInNewContext(`(${inspectionFunctionSource})`, context);
 
-  assert.deepEqual({ ...inspect() }, { length: 13 });
+  assert.deepEqual({ ...inspect() }, {
+    selectionLength: 13,
+    isGmail: false,
+    hasGmailThread: false
+  });
+});
+
+test("source inspection recognizes an open Gmail thread", () => {
+  const context = {
+    chrome: {
+      runtime: {
+        sendMessage() {
+          return Promise.resolve();
+        }
+      }
+    },
+    document: {
+      activeElement: null,
+      addEventListener() {},
+      body: {},
+      querySelector(selector) {
+        return selector === "h2.hP" || selector.includes(".a3s") ? {} : null;
+      }
+    },
+    location: { hostname: "mail.google.com" },
+    MutationObserver: class {
+      observe() {}
+    },
+    window: {
+      requestAnimationFrame() {},
+      getSelection() {
+        return { isCollapsed: true, toString: () => "" };
+      }
+    }
+  };
+  const inspect = vm.runInNewContext(`(${inspectionFunctionSource})`, context);
+
+  assert.deepEqual({ ...inspect() }, {
+    selectionLength: 0,
+    isGmail: true,
+    hasGmailThread: true
+  });
 });
