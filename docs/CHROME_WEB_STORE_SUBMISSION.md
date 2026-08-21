@@ -144,12 +144,18 @@ If Chrome review requires access to a paid or credential-gated feature, provide 
 9. In **Store Listing**, update the description and screenshots when features have changed, and set the Homepage URL to the GitHub repository.
 10. In **Privacy**, reconcile the disclosure, permission justifications, and privacy-policy URL with the packaged code.
 11. Review **Distribution** and **Test Instructions**, then save the draft.
-12. Keep automatic publishing disabled unless immediate publication after approval is explicitly intended.
+12. Keep automatic publishing enabled for Side Translator updates unless a release explicitly requires staged publishing.
 13. Submit the draft for review. Uploading a package and submitting it for review are separate actions.
 14. After approval, publish manually if automatic publishing was disabled.
 15. Verify the public Store page version, GitHub link, description, and install flow in a signed-out browser.
 
 Record the submitted version, ZIP filename, submission date, review state, and publication result in the pull request or release notes. A dashboard state of **Pending review** is not proof that the update is published.
+
+## Submission history
+
+| Version | Package | Submitted | Status at handoff | Publishing mode |
+| --- | --- | --- | --- | --- |
+| 0.1.3 | `dist/side-translator-0.1.3.zip` | August 21, 2026 | Pending review | Automatic after approval |
 
 ## Official references
 
