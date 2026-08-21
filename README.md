@@ -12,6 +12,7 @@ A Manifest V3 Chrome extension that opens in the browser side panel and uses the
 - Translates the extracted content into Japanese while preserving its structure.
 - Summarizes the extracted content in Japanese with an overview and key points.
 - Lets users customize the translation, summarization, and reply-drafting instructions from the settings page.
+- Keeps up to 50 recent results in local history for reopening, copying, or deleting. Source text and reply requirements are not retained.
 - Uses `gpt-5.4-nano` through the OpenAI Responses API.
 - Stores the user-provided API key only in `chrome.storage.local`.
 - Renders a safe Markdown subset with DOM APIs, without executing webpage or model-generated HTML.
@@ -40,7 +41,7 @@ Chrome grants the extension access to HTTP and HTTPS pages so it can extract the
 
 ## Privacy and API-key notes
 
-The API key is stored in Chrome local extension storage, not sync storage. It is still client-side secret material: a person or program with sufficient access to the Chrome profile or extension runtime may be able to retrieve it. For a multi-user production deployment, route requests through an authenticated backend and keep the OpenAI API key on the server instead.
+The API key and result history are stored in Chrome local extension storage, not sync storage. History contains the result, page title, operation type, timestamp, and display metadata; it does not contain the extracted source text, page URL, or reply requirements. Client-side storage is still accessible to a person or program with sufficient access to the Chrome profile or extension runtime. For a multi-user production deployment, route requests through an authenticated backend and keep the OpenAI API key on the server instead.
 
 ## Content extraction
 

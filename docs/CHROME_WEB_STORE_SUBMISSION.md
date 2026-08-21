@@ -24,6 +24,7 @@ Features:
 - Summarize content in Japanese with an overview and key points.
 - Keep the side panel available while browsing between pages.
 - Customize translation and summarization instructions.
+- Reopen, copy, or delete up to 50 recent results stored locally on the device.
 - Safely render a limited Markdown subset without executing generated HTML.
 - Store the user-provided OpenAI API key only in local Chrome extension storage.
 
@@ -57,7 +58,7 @@ Translate or summarize user-selected text or the main content of the active web 
 
 `storage`
 
-> Required to store the user's OpenAI API key and custom translation and summarization instructions locally in Chrome. The data is not stored using Chrome Sync.
+> Required to store the user's OpenAI API key, custom instructions, and up to 50 recent results with page titles and display metadata locally in Chrome. Result history does not retain source text, page URLs, or reply requirements. The data is not stored using Chrome Sync.
 
 Host permissions for `http://*/*` and `https://*/*`
 
@@ -74,6 +75,7 @@ Review the dashboard's current data categories and disclose at least the categor
 - Website content: selected text or extracted main page text.
 - Authentication information: the user-provided OpenAI API key.
 - User-provided content: custom translation and summarization instructions, if the dashboard presents a matching category.
+- Locally retained result history: generated results, page titles, operation types, timestamps, and display metadata.
 
 Declare that the data is used only for the extension's single purpose, is not sold, is not used for advertising or creditworthiness, and is transferred to OpenAI only to perform the user-requested API operation.
 

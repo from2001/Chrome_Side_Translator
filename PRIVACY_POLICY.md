@@ -1,22 +1,24 @@
 # Privacy Policy for Side Translator
 
-Last updated: August 14, 2026
+Last updated: August 21, 2026
 
-Side Translator is a Chrome extension that translates or summarizes text from the active web page in Japanese by using the OpenAI API.
+Side Translator is a Chrome extension that translates or summarizes text from the active web page in Japanese and creates email reply drafts by using the OpenAI API.
 
 ## Data the extension handles
 
-The extension handles the following data only to provide its translation and summarization features:
+The extension handles the following data only to provide its translation, summarization, and reply-drafting features:
 
 - Text selected by the user, or the main text extracted from the active web page.
 - An OpenAI API key supplied by the user.
-- Custom translation and summarization instructions supplied by the user.
+- Custom translation, summarization, and reply-drafting instructions supplied by the user.
+- Reply requirements supplied by the user when creating an email reply draft.
+- Generated results and the associated page title, operation type, timestamp, and display metadata saved in local history.
 
-The page title and URL may be displayed locally in the extension interface, but they are not included in requests to the OpenAI API.
+The page title and URL may be displayed locally in the extension interface, but they are not included in requests to the OpenAI API. The page title is saved with local history; the page URL is not saved in history.
 
 ## How data is used and shared
 
-When the user explicitly starts a translation or summary, the selected or extracted page text and the applicable instruction are sent directly from the extension to the OpenAI Responses API. The user's OpenAI API key is sent to OpenAI as authentication for that request.
+When the user explicitly starts a translation, summary, or reply draft, the selected or extracted page text and the applicable instruction are sent directly from the extension to the OpenAI Responses API. Reply drafting also sends the reply requirements entered by the user. The user's OpenAI API key is sent to OpenAI as authentication for that request.
 
 The publisher does not operate an intermediary server for these requests and does not receive, sell, rent, or use this data for advertising, credit decisions, or unrelated purposes. OpenAI processes API requests under its own applicable terms and privacy practices.
 
@@ -24,9 +26,9 @@ The extension's use and transfer of information received from Google APIs compli
 
 ## Local storage and retention
 
-The OpenAI API key and custom instructions are stored locally in the user's Chrome extension storage. They are not synchronized through Chrome. The publisher does not retain copies of this locally stored data.
+The OpenAI API key, custom instructions, and up to 50 recent result-history entries are stored locally in the user's Chrome extension storage. They are not synchronized through Chrome. History does not retain the extracted source text, page URL, or reply requirements. The publisher does not retain copies of this locally stored data.
 
-Users can delete the saved API key from the extension's settings page. Users can remove all extension data by uninstalling the extension or clearing its stored data in Chrome.
+Users can delete individual history entries or all history from the side panel and can delete the saved API key from the extension's settings page. Users can remove all extension data by uninstalling the extension or clearing its stored data in Chrome.
 
 ## Website access
 

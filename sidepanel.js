@@ -1,10 +1,24 @@
 import { INSTRUCTION_STORAGE_KEYS, requestOpenAI } from "./lib/openai.js";
 import { getCopyText, normalizeModelOutput, renderMarkdown } from "./lib/result-format.js";
+import {
+  HISTORY_STORAGE_KEY,
+  addHistoryEntry,
+  clearHistory,
+  deleteHistoryEntry,
+  loadHistory,
+  normalizeHistoryEntries
+} from "./lib/history.js";
 
 const API_KEY_STORAGE_KEY = "openaiApiKey";
 
 const elements = {
   keyNotice: document.querySelector("#key-notice"),
+  openHistoryButton: document.querySelector("#open-history"),
+  closeHistoryButton: document.querySelector("#close-history"),
+  clearHistoryButton: document.querySelector("#clear-history"),
+  historyCard: document.querySelector("#history-card"),
+  historyEmpty: document.querySelector("#history-empty"),
+  historyList: document.querySelector("#history-list"),
   sourceIndicatorLabel: document.querySelector("#source-indicator-label"),
   pageActions: document.querySelector("#page-actions"),
   gmailActions: document.querySelector("#gmail-actions"),
@@ -40,14 +54,19 @@ let sourceRefreshSequence = 0;
 let copyFeedbackTimer = null;
 let currentSourceState = { selectionLength: 0, isGmail: false, hasGmailThread: false };
 let isBusy = false;
+let historyEntries = [];
 
 initialize();
 
 async function initialize() {
-  await Promise.all([refreshKeyState(), refreshSourceIndicator()]);
+  await Promise.all([refreshKeyState(), refreshSourceIndicator(), refreshHistory()]);
 
   document.querySelectorAll("#open-settings, #notice-settings, #footer-settings")
     .forEach((button) => button.addEventListener("click", () => chrome.runtime.openOptionsPage()));
+
+  elements.openHistoryButton.addEventListener("click", toggleHistory);
+  elements.closeHistoryButton.addEventListener("click", closeHistory);
+  elements.clearHistoryButton.addEventListener("click", handleClearHistory);
 
   elements.translateButton.addEventListener("click", () => processPage("translate"));
   elements.summarizeButton.addEventListener("click", () => processPage("summarize"));
@@ -80,6 +99,10 @@ async function initialize() {
     if (areaName === "local" && changes[API_KEY_STORAGE_KEY]) {
       refreshKeyState();
     }
+    if (areaName === "local" && changes[HISTORY_STORAGE_KEY]) {
+      historyEntries = normalizeHistoryEntries(changes[HISTORY_STORAGE_KEY].newValue);
+      renderHistory();
+    }
   });
 
   chrome.runtime.onMessage.addListener((message) => {
@@ -95,6 +118,117 @@ async function initialize() {
     }
   });
   window.addEventListener("focus", refreshSourceIndicator);
+}
+
+async function refreshHistory() {
+  try {
+    historyEntries = await loadHistory(chrome.storage.local);
+  } catch {
+    historyEntries = [];
+  }
+  renderHistory();
+}
+
+function toggleHistory() {
+  if (elements.historyCard.hidden) {
+    elements.historyCard.hidden = false;
+    elements.openHistoryButton.setAttribute("aria-expanded", "true");
+    elements.historyCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    closeHistory();
+  }
+}
+
+function closeHistory() {
+  elements.historyCard.hidden = true;
+  elements.openHistoryButton.setAttribute("aria-expanded", "false");
+}
+
+function renderHistory() {
+  elements.historyList.replaceChildren();
+  elements.historyEmpty.hidden = historyEntries.length > 0;
+  elements.clearHistoryButton.hidden = historyEntries.length === 0;
+
+  historyEntries.forEach((entry) => {
+    const item = document.createElement("li");
+    item.className = "history-item";
+
+    const openButton = document.createElement("button");
+    openButton.className = "history-open-button";
+    openButton.type = "button";
+    openButton.addEventListener("click", () => openHistoryEntry(entry));
+
+    const meta = document.createElement("span");
+    meta.className = "history-item-meta";
+    const mode = document.createElement("span");
+    mode.className = "history-mode";
+    mode.textContent = getModePresentation(entry.mode).kicker;
+    const time = document.createElement("time");
+    time.dateTime = entry.createdAt;
+    time.textContent = formatHistoryDate(entry.createdAt);
+    meta.append(mode, time);
+
+    const title = document.createElement("strong");
+    title.className = "history-item-title";
+    title.textContent = entry.title;
+    const preview = document.createElement("p");
+    preview.className = "history-preview";
+    preview.textContent = entry.output.replace(/\s+/g, " ");
+    openButton.append(meta, title, preview);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "history-delete-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "×";
+    deleteButton.setAttribute("aria-label", `${entry.title}を履歴から削除`);
+    deleteButton.addEventListener("click", () => handleDeleteHistory(entry.id));
+
+    item.append(openButton, deleteButton);
+    elements.historyList.append(item);
+  });
+}
+
+function openHistoryEntry(entry) {
+  hideError();
+  renderResult({
+    mode: entry.mode,
+    output: entry.output,
+    sourceMeta: buildSourceMeta(entry)
+  });
+  closeHistory();
+}
+
+async function handleDeleteHistory(id) {
+  try {
+    historyEntries = await deleteHistoryEntry(chrome.storage.local, id);
+    renderHistory();
+    hideError();
+  } catch {
+    showError("履歴を削除できませんでした。もう一度お試しください。");
+  }
+}
+
+async function handleClearHistory() {
+  if (!window.confirm("保存されている履歴をすべて削除しますか？")) {
+    return;
+  }
+
+  try {
+    historyEntries = await clearHistory(chrome.storage.local);
+    renderHistory();
+    hideError();
+  } catch {
+    showError("履歴を削除できませんでした。もう一度お試しください。");
+  }
+}
+
+function formatHistoryDate(value) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 }
 
 async function refreshSourceIndicator() {
@@ -216,6 +350,7 @@ function renderSourceActions() {
 }
 
 function updateActionAvailability() {
+  elements.openHistoryButton.disabled = isBusy;
   elements.translateButton.disabled = isBusy;
   elements.summarizeButton.disabled = isBusy;
   const gmailDisabled = isBusy || !currentSourceState.hasGmailThread;
@@ -267,6 +402,7 @@ async function processPage(mode, gmailScope = null, replyNotes = "") {
   }
 
   activeController = new AbortController();
+  closeHistory();
   setBusy(true);
   hideError();
   elements.resultCard.hidden = true;
@@ -309,7 +445,17 @@ async function processPage(mode, gmailScope = null, replyNotes = "") {
       signal: activeController.signal
     });
 
-    showResult(mode, page, output);
+    const normalizedOutput = showResult(mode, page, output);
+    try {
+      historyEntries = await addHistoryEntry(chrome.storage.local, {
+        mode,
+        page,
+        output: normalizedOutput
+      });
+      renderHistory();
+    } catch {
+      showError("結果は表示しましたが、履歴を保存できませんでした。");
+    }
   } catch (error) {
     if (error.name !== "AbortError") {
       showError(toUserMessage(error));
@@ -738,7 +884,17 @@ function updateProgress(title, detail) {
 }
 
 function showResult(mode, page, output) {
-  currentResultText = normalizeModelOutput(output);
+  const normalizedOutput = normalizeModelOutput(output);
+  renderResult({
+    mode,
+    output: normalizedOutput,
+    sourceMeta: buildSourceMeta(page)
+  });
+  return normalizedOutput;
+}
+
+function renderResult({ mode, output, sourceMeta }) {
+  currentResultText = output;
   window.clearTimeout(copyFeedbackTimer);
   elements.copyMenus.forEach((menu) => {
     menu.open = false;
@@ -746,14 +902,30 @@ function showResult(mode, page, output) {
   elements.copyMenuTriggers.forEach((trigger) => {
     trigger.textContent = "コピー";
   });
-  elements.resultMode.textContent = mode === "translate" ? "TRANSLATION" : mode === "reply" ? "REPLY DRAFT" : "SUMMARY";
-  elements.resultTitle.textContent = mode === "translate" ? "翻訳結果" : mode === "reply" ? "返信案" : "要約結果";
-  const sourceLabel = getSourceLabel(page.sourceType);
-  const messageCount = page.messageCount ? ` · ${page.messageCount.toLocaleString("ja-JP")}通` : "";
-  elements.sourceMeta.textContent = `${sourceLabel} · ${page.title}${messageCount} · ${page.content.length.toLocaleString("ja-JP")}文字${page.truncated ? "（上限で省略）" : ""}`;
+  const presentation = getModePresentation(mode);
+  elements.resultMode.textContent = presentation.kicker;
+  elements.resultTitle.textContent = presentation.title;
+  elements.sourceMeta.textContent = sourceMeta;
   renderMarkdown(elements.resultOutput, currentResultText);
   elements.resultCard.hidden = false;
   elements.resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function getModePresentation(mode) {
+  if (mode === "translate") {
+    return { kicker: "TRANSLATION", title: "翻訳結果" };
+  }
+  if (mode === "reply") {
+    return { kicker: "REPLY DRAFT", title: "返信案" };
+  }
+  return { kicker: "SUMMARY", title: "要約結果" };
+}
+
+function buildSourceMeta(source) {
+  const sourceLabel = getSourceLabel(source.sourceType);
+  const messageCount = source.messageCount ? ` · ${source.messageCount.toLocaleString("ja-JP")}通` : "";
+  const sourceLength = source.sourceLength || (source.content ? source.content.length : 0);
+  return `${sourceLabel} · ${source.title}${messageCount} · ${sourceLength.toLocaleString("ja-JP")}文字${source.truncated ? "（上限で省略）" : ""}`;
 }
 
 function getSourceLabel(sourceType) {
