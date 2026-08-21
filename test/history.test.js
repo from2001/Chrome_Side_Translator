@@ -111,11 +111,17 @@ test("all history entries can be cleared", async () => {
 
 test("side panel exposes history controls and explains local retention", async () => {
   const html = await readFile(new URL("../sidepanel.html", import.meta.url), "utf8");
+  const script = await readFile(new URL("../sidepanel.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../styles.css", import.meta.url), "utf8");
 
   assert.match(html, /id="open-history"/);
   assert.match(html, /id="history-card"[^>]*hidden/);
   assert.match(html, /id="history-list"/);
-  assert.match(html, /結果とページタイトルをこの端末内に最大50件保存/);
+  assert.match(html, /結果とページタイトルをこの端末内に最大50件保存します。/);
+  assert.doesNotMatch(html, /元の本文や返信内容の入力は保存しません/);
+  assert.match(script, /`\$\{formatHistoryDate\(entry\.createdAt\)\}: \$\{entry\.title\}`/);
+  assert.doesNotMatch(script, /history-preview|history-mode/);
+  assert.match(styles, /\.history-item-label\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap;/s);
 });
 
 test("the extension package includes the history module", async () => {

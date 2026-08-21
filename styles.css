@@ -230,6 +230,7 @@ p {
 }
 
 .history-open-button {
+  display: block;
   min-width: 0;
   flex: 1;
   padding: 11px 12px;
@@ -246,38 +247,14 @@ p {
   outline: none;
 }
 
-.history-item-meta {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 4px;
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.history-mode {
-  color: var(--green-dark);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-}
-
-.history-item-title,
-.history-preview {
+.history-item-label {
+  display: block;
+  width: 100%;
   overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.history-item-title {
-  display: block;
-  margin-bottom: 3px;
-  font-size: 13px;
-}
-
-.history-preview {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
 }
 
 .history-delete-button {

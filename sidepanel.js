@@ -158,23 +158,11 @@ function renderHistory() {
     openButton.type = "button";
     openButton.addEventListener("click", () => openHistoryEntry(entry));
 
-    const meta = document.createElement("span");
-    meta.className = "history-item-meta";
-    const mode = document.createElement("span");
-    mode.className = "history-mode";
-    mode.textContent = getModePresentation(entry.mode).kicker;
-    const time = document.createElement("time");
-    time.dateTime = entry.createdAt;
-    time.textContent = formatHistoryDate(entry.createdAt);
-    meta.append(mode, time);
-
-    const title = document.createElement("strong");
-    title.className = "history-item-title";
-    title.textContent = entry.title;
-    const preview = document.createElement("p");
-    preview.className = "history-preview";
-    preview.textContent = entry.output.replace(/\s+/g, " ");
-    openButton.append(meta, title, preview);
+    const label = document.createElement("span");
+    label.className = "history-item-label";
+    label.textContent = `${formatHistoryDate(entry.createdAt)}: ${entry.title}`;
+    label.title = label.textContent;
+    openButton.append(label);
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "history-delete-button";
