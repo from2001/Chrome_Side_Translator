@@ -18,6 +18,7 @@ styles.css
 lib/openai.js
 lib/page-content.js
 lib/result-format.js
+lib/history.js
 assets/icons/icon-16.png
 assets/icons/icon-32.png
 assets/icons/icon-48.png

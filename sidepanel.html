@@ -15,9 +15,14 @@
           <h1>Side Translator</h1>
         </div>
       </div>
-      <button id="open-settings" class="icon-button" type="button" aria-label="設定を開く" title="設定を開く">
-        <span aria-hidden="true">⚙</span>
-      </button>
+      <div class="header-actions">
+        <button id="open-history" class="icon-button" type="button" aria-label="履歴を開く" title="履歴を開く" aria-controls="history-card" aria-expanded="false">
+          <span aria-hidden="true">履</span>
+        </button>
+        <button id="open-settings" class="icon-button" type="button" aria-label="設定を開く" title="設定を開く">
+          <span aria-hidden="true">⚙</span>
+        </button>
+      </div>
     </header>
 
     <main>
@@ -27,6 +32,22 @@
           <p>翻訳・要約・返信案作成にはOpenAI APIキーが必要です。</p>
         </div>
         <button id="notice-settings" class="text-button" type="button">設定</button>
+      </section>
+
+      <section id="history-card" class="history-card" aria-labelledby="history-title" hidden>
+        <div class="history-header">
+          <div>
+            <p class="section-kicker">HISTORY</p>
+            <h2 id="history-title">処理履歴</h2>
+          </div>
+          <div class="history-header-actions">
+            <button id="clear-history" class="text-button danger-text-button" type="button">すべて削除</button>
+            <button id="close-history" class="text-button" type="button">閉じる</button>
+          </div>
+        </div>
+        <p id="history-empty" class="history-empty">履歴はまだありません。</p>
+        <ol id="history-list" class="history-list" aria-label="処理履歴"></ol>
+        <p class="history-note">結果とページタイトルをこの端末内に最大50件保存します。</p>
       </section>
 
       <section id="reply-composer" class="reply-composer" aria-labelledby="reply-composer-title" hidden>

@@ -112,6 +112,12 @@ p {
   background: var(--surface);
 }
 
+.header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 .icon-button:hover,
 .text-button:hover,
 .link-button:hover {
@@ -152,12 +158,131 @@ p {
   line-height: 1.5;
 }
 
-.result-card {
+.result-card,
+.history-card {
   padding: 18px;
   border: 1px solid rgba(215, 224, 220, 0.95);
   border-radius: 18px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.history-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.history-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.history-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.danger-text-button {
+  color: var(--red);
+}
+
+.history-empty,
+.history-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.history-empty {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.history-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.history-list {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-item {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  gap: 6px;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.history-open-button {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  padding: 11px 12px;
+  text-align: left;
+  color: var(--ink);
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+}
+
+.history-open-button:hover,
+.history-open-button:focus-visible {
+  background: var(--green-soft);
+  outline: none;
+}
+
+.history-item-label {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-delete-button {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-right: 5px;
+  padding: 8px;
+  color: var(--muted);
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 16px;
+}
+
+.history-delete-button:hover,
+.history-delete-button:focus-visible {
+  color: var(--red);
+  background: var(--red-soft);
+  outline: none;
 }
 
 .reply-composer {
