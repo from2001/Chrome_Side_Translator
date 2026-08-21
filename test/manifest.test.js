@@ -6,7 +6,8 @@ test("manifest grants persistent access to translatable web pages", async () => 
   const source = await readFile(new URL("../manifest.json", import.meta.url), "utf8");
   const manifest = JSON.parse(source);
 
-  assert.equal(manifest.version, "0.1.2");
+  assert.equal(manifest.version, "0.1.3");
+  assert.equal(manifest.homepage_url, "https://github.com/from2001/Chrome_Side_Translator");
   assert.ok(manifest.permissions.includes("scripting"));
   assert.ok(manifest.host_permissions.includes("http://*/*"));
   assert.ok(manifest.host_permissions.includes("https://*/*"));

@@ -2,6 +2,8 @@
 
 A Manifest V3 Chrome extension that opens in the browser side panel and uses the OpenAI Responses API to translate or summarize the main content of the current page in Japanese.
 
+[Install Side Translator from the Chrome Web Store](https://chromewebstore.google.com/detail/side-translator/cnabgahfhpibcaohplkmgmidppkkklgg)
+
 ![Side Translator summarizing a Chrome extension documentation page](store-assets/side-translator-summary-1280x800.png)
 
 ## Features
