@@ -9,6 +9,7 @@ import {
   clearHistory,
   createHistoryEntry,
   deleteHistoryEntry,
+  formatHistoryDate,
   normalizeHistoryEntries
 } from "../lib/history.js";
 
@@ -60,6 +61,13 @@ test("history entry stores the result without the source text or URL", () => {
     output: "Result 1"
   });
   assert.doesNotMatch(JSON.stringify(entry), /Source content|Private reply|example\.com/);
+});
+
+test("history date uses zero-padded month, day, hour, and minute", () => {
+  const localDate = new Date(2026, 7, 3, 9, 5);
+
+  assert.equal(formatHistoryDate(localDate.toISOString()), "08/03 09:05");
+  assert.equal(formatHistoryDate("invalid"), "");
 });
 
 test("history keeps the newest entries up to the configured limit", async () => {
@@ -122,6 +130,8 @@ test("side panel exposes history controls and explains local retention", async (
   assert.match(script, /`\$\{formatHistoryDate\(entry\.createdAt\)\}: \$\{entry\.title\}`/);
   assert.doesNotMatch(script, /history-preview|history-mode/);
   assert.match(styles, /\.history-item-label\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap;/s);
+  assert.match(styles, /\.history-item\s*\{[^}]*min-width:\s*0;[^}]*overflow:\s*hidden;/s);
+  assert.match(styles, /\.history-open-button\s*\{[^}]*min-width:\s*0;[^}]*overflow:\s*hidden;/s);
 });
 
 test("the extension package includes the history module", async () => {

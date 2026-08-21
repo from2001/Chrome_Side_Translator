@@ -5,6 +5,7 @@ import {
   addHistoryEntry,
   clearHistory,
   deleteHistoryEntry,
+  formatHistoryDate,
   loadHistory,
   normalizeHistoryEntries
 } from "./lib/history.js";
@@ -208,15 +209,6 @@ async function handleClearHistory() {
   } catch {
     showError("履歴を削除できませんでした。もう一度お試しください。");
   }
-}
-
-function formatHistoryDate(value) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
 }
 
 async function refreshSourceIndicator() {

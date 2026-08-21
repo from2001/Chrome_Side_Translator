@@ -168,6 +168,9 @@ p {
 }
 
 .history-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   margin-bottom: 14px;
 }
 
@@ -214,6 +217,8 @@ p {
 
 .history-list {
   display: grid;
+  width: 100%;
+  min-width: 0;
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -222,6 +227,9 @@ p {
 
 .history-item {
   display: flex;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
   gap: 6px;
   align-items: stretch;
   border: 1px solid var(--line);
@@ -232,6 +240,7 @@ p {
 .history-open-button {
   display: block;
   min-width: 0;
+  overflow: hidden;
   flex: 1;
   padding: 11px 12px;
   text-align: left;
