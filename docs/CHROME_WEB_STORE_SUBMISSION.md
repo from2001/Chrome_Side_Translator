@@ -83,6 +83,7 @@ Review the dashboard's current data categories and disclose at least the categor
 
 - Website content: selected text or extracted main page text.
 - Authentication information: the user-provided OpenAI API key.
+- Personal communications: Gmail message bodies and available message metadata used by the Gmail actions.
 - User-provided content: custom instructions and Gmail reply requirements, if the dashboard presents a matching category.
 - Locally retained result history: generated results, page titles, operation types, timestamps, and display metadata.
 
@@ -116,6 +117,7 @@ Capture screenshots that show real extension behavior without exposing an API ke
 > 3. Open a normal HTTP or HTTPS article page.
 > 4. Click Translate to Japanese or Summarize in Japanese.
 > 5. Optionally select text on the page and repeat the operation to verify selection-only processing.
+> 6. Optionally open a Gmail conversation to verify the Gmail summary, translation, and reply-draft actions. The reply-draft action produces copyable text and does not send an email. Attachment contents are not read.
 > The extension cannot run on Chrome internal pages or the Chrome Web Store. API usage may incur charges on the reviewer's OpenAI account.
 
 If Chrome review requires access to a paid or credential-gated feature, provide a dedicated test credential through the dashboard's secure reviewer-instructions field. Do not put credentials in the public listing or the extension package.
